@@ -15,6 +15,6 @@ public class HelloEc2Application {
 
 	@GetMapping
 	public String hello() {
-		return "HI_22_Aug";
+		return "HI_29_Aug";
 	}
 }
