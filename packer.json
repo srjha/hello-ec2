@@ -1,0 +1,56 @@
+{
+  "variables": {
+    "aws_access_key": "AKIAJIAW4ANPTU6TMJEA",
+    "aws_secret_key": "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",
+    "app_name" : "java v.1"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+   "secret_key": "{{user `aws_secret_key`}}",
+    "region": "eu-central-1",
+    "source_ami": "ami-e4c63e8b",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ami_name": "packer-{{user `app_name`}}",
+    "communicator": "ssh"
+  }],
+  "provisioners": [
+  {
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "sudo yum update -y",
+      "sudo yum install java-1.8.0-openjdk.x86_64 -y"
+    ]
+  },
+  {
+    "type": "file",
+    "source": "/vagrant/basic-api-0.0.1-SNAPSHOT.jar",
+    "destination": "/home/ec2-user/basic-api-0.0.1-SNAPSHOT.jar"
+  },
+  {
+    "type": "file",
+    "source": "/vagrant/startup/spring.service",
+    "destination": "/home/ec2-user/spring.service"
+  },
+  {
+    "type": "file",
+    "source": "/vagrant/startup/startup.sh",
+    "destination": "/home/ec2-user/startup.sh"
+  },
+  {
+    "type": "shell",
+    "inline": [
+      "sleep 5",
+      "sudo cp /home/ec2-user/spring.service /etc/systemd/system/",
+      "sed -i 's/\r$//' /home/ec2-user/startup.sh",
+      "sudo systemctl enable NetworkManager-wait-online",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable spring.service",
+      "sudo systemctl start spring.service"
+    ]
+  }
+  ]
+ 
+}
